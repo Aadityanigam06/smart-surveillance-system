@@ -2,6 +2,8 @@ import cv2
 import face_recognition
 import os
 import numpy as np
+from database_handler import log_event
+import time
 
 known_encodings = []
 known_names = []
@@ -34,6 +36,7 @@ print("Known faces:", known_names)
 
 # Start webcam
 cap = cv2.VideoCapture(0)
+last_logged = {}
 
 while True:
     ret, frame = cap.read()
@@ -42,42 +45,46 @@ while True:
         print("Camera error")
         break
 
-    # Resize for speed
     small_frame = cv2.resize(frame, (0, 0), fx=0.5, fy=0.5)
-
-    # Convert BGR → RGB
     rgb_small = cv2.cvtColor(small_frame, cv2.COLOR_BGR2RGB)
 
-    # Detect faces
     face_locations = face_recognition.face_locations(rgb_small)
     face_encodings = face_recognition.face_encodings(rgb_small, face_locations)
+
+    current_time = time.time()
+
+    detected_names = []   # 🔥 store names first
 
     for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
 
         name = "Unknown"
+        status = "unknown"
 
         if len(known_encodings) > 0:
             face_distances = face_recognition.face_distance(known_encodings, face_encoding)
-
             best_match_index = np.argmin(face_distances)
 
-            print("Distances:", face_distances)
-
-            if face_distances[best_match_index] < 0.5:
+            if face_distances[best_match_index] < 0.6:
                 name = known_names[best_match_index]
+                status = "known"
 
-        # Scale back up coordinates
+        detected_names.append((name, status))   # 🔥 store result
+
+        # Draw rectangle
         top *= 2
         right *= 2
         bottom *= 2
         left *= 2
 
-        # Draw rectangle
         cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 0), 2)
-
-        # Put name
         cv2.putText(frame, name, (left, top - 10),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
+
+    # 🔥 LOGGING OUTSIDE LOOP
+    for name, status in detected_names:
+        if name not in last_logged or (current_time - last_logged[name]) > 5:
+            log_event(name, status)
+            last_logged[name] = current_time
 
     cv2.imshow("Face Recognition", frame)
 
