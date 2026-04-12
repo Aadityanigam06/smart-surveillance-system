@@ -24,7 +24,7 @@ app.get("/events", (req, res) => {
   db.query(query, (err, result) => {
     if (err) {
       console.error(err);
-      res.status(500).send("Error fetching data");
+      res.status(500).json({ error: "Error fetching data" });
     } else {
       res.json(result);
     }
