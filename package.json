@@ -1,0 +1,28 @@
+{
+  "name": "smart-surveillance-system",
+  "version": "1.0.0",
+  "description": "A real-time AI-based surveillance system with face recognition, alerting, and dashboard.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "concurrently \"cd backend && node server.js\" \"cd frontend && npm start\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Aadityanigam06/smart-surveillance-system.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Aadityanigam06/smart-surveillance-system/issues"
+  },
+  "homepage": "https://github.com/Aadityanigam06/smart-surveillance-system#readme",
+  "dependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
