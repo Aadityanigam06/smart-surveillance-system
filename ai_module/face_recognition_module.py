@@ -5,34 +5,42 @@ import numpy as np
 from database_handler import log_event
 import time
 
-known_encodings = []
-known_names = []
-
 known_faces_dir = "ai_module/known_faces"
 
-print("Loading known faces...")
+# 🔥 NEW: function to load faces
+def load_known_faces():
+    known_encodings = []
+    known_names = []
 
-# Load and encode known faces
-for file in os.listdir(known_faces_dir):
-    image_path = os.path.join(known_faces_dir, file)
+    print("🔄 Reloading known faces...")
 
-    image = face_recognition.load_image_file(image_path)
-    encodings = face_recognition.face_encodings(image)
+    for file in os.listdir(known_faces_dir):
+        image_path = os.path.join(known_faces_dir, file)
 
-    if len(encodings) > 0:
-        encoding = encodings[0]
-        known_encodings.append(encoding)
+        if file.endswith((".jpg", ".jpeg", ".png")):
+            image = face_recognition.load_image_file(image_path)
+            encodings = face_recognition.face_encodings(image)
 
-        # Extract name (aaditya_1.jpg → aaditya)
-        name = file.split('_')[0]
-        known_names.append(name)
+            if len(encodings) > 0:
+                encoding = encodings[0]
+                known_encodings.append(encoding)
 
-        print(f"Loaded: {name}")
-    else:
-        print(f"❌ No face found in {file}")
+                name = file.split('_')[0]
+                known_names.append(name)
 
-print("Known faces:", known_names)
+                print(f"Loaded: {name}")
+            else:
+                print(f"❌ No face found in {file}")
 
+    print("Known faces:", known_names)
+    return known_encodings, known_names
+
+
+# 🔥 INITIAL LOAD
+known_encodings, known_names = load_known_faces()
+
+# 🔥 Timer for reload
+last_reload_time = time.time()
 
 # Start webcam
 cap = cv2.VideoCapture(0)
@@ -45,15 +53,19 @@ while True:
         print("Camera error")
         break
 
+    # 🔥 AUTO RELOAD EVERY 10 SECONDS
+    current_time = time.time()
+    if current_time - last_reload_time > 10:
+        known_encodings, known_names = load_known_faces()
+        last_reload_time = current_time
+
     small_frame = cv2.resize(frame, (0, 0), fx=0.5, fy=0.5)
     rgb_small = cv2.cvtColor(small_frame, cv2.COLOR_BGR2RGB)
 
     face_locations = face_recognition.face_locations(rgb_small)
     face_encodings = face_recognition.face_encodings(rgb_small, face_locations)
 
-    current_time = time.time()
-
-    detected_names = []   # 🔥 store names first
+    detected_names = []
 
     for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
 
@@ -68,19 +80,20 @@ while True:
                 name = known_names[best_match_index]
                 status = "known"
 
-        detected_names.append((name, status))   # 🔥 store result
+        detected_names.append((name, status))
 
-        # Draw rectangle
+        # Scale back
         top *= 2
         right *= 2
         bottom *= 2
         left *= 2
 
+        # Draw rectangle
         cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 0), 2)
         cv2.putText(frame, name, (left, top - 10),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
 
-    # 🔥 LOGGING OUTSIDE LOOP
+    # 🔥 LOGGING CONTROL
     for name, status in detected_names:
         if name not in last_logged or (current_time - last_logged[name]) > 5:
             log_event(name, status)

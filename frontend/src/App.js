@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 
 function App() {
   const [events, setEvents] = useState([]);
+  const[name, setName] = useState("");
+  const[image, setImage] = useState(null);
 
 useEffect(() => {
   const fetchData = () => {
@@ -18,7 +20,49 @@ useEffect(() => {
   return () => clearInterval(interval); // cleanup
 }, []);
 
-  return (
+
+const handleUpload = async () => {
+  const formData = new FormData();
+  formData.append("name", name);
+  formData.append("image", image);
+
+  try {
+    const res = await fetch("http://localhost:5000/add-face", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await res.json();
+    alert(data.message);
+  } catch (err) {
+    console.error(err);
+    alert("Upload failed");
+  }
+};
+
+
+
+return (
+  <>
+    <div style={{ marginBottom: "20px" }}>
+      <h3>Add New Face</h3>
+
+      <input
+        type="text"
+        placeholder="Enter name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
+
+      <input
+        type="file"
+        onChange={(e) => setImage(e.target.files[0])}
+      />
+
+      <button onClick={handleUpload}>
+        Upload
+      </button>
+    </div>
     <div style={styles.container}>
       <h1 style={styles.heading}>Smart Surveillance Dashboard</h1>
 
@@ -53,7 +97,8 @@ useEffect(() => {
         </tbody>
       </table>
     </div>
-  );
+  </>
+);
 }
 
 const styles = {
