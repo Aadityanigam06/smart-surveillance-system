@@ -40,12 +40,15 @@ const handleUpload = async () => {
   }
 };
 
-
+const total = events.length;
+const known = events.filter(e => e.status === "known").length;
+const unknown = total - known;
 
 return (
   <>
-    <div style={{ marginBottom: "20px" }}>
-      <h3>Add New Face</h3>
+
+    <div style={{ marginBottom: "20px" },{textAlign:"center"}}>
+      <h1>Add New Face</h1>
 
       <input
         type="text"
@@ -55,17 +58,32 @@ return (
       />
 
       <input
+       styles={styles.input}
         type="file"
-        onChange={(e) => setImage(e.target.files[0])}
-      />
+        onChange={(e) => setImage(e.target.files[0])}/>
 
-      <button onClick={handleUpload}>
+      <button style={styles.button} onClick={handleUpload}>
         Upload
       </button>
     </div>
     <div style={styles.container}>
       <h1 style={styles.heading}>Smart Surveillance Dashboard</h1>
+<div style={styles.statsContainer}>
+  <div style={{ ...styles.card, backgroundColor: "#3498db" }}>
+    <h3>Total</h3>
+    <p>{total}</p>
+  </div>
 
+  <div style={{ ...styles.card, backgroundColor: "#2ecc71" }}>
+    <h3>Known</h3>
+    <p>{known}</p>
+  </div>
+
+  <div style={{ ...styles.card, backgroundColor: "#e74c3c" }}>
+    <h3>Unknown</h3>
+    <p>{unknown}</p>
+  </div>
+</div>
       <table style={styles.table}>
         <thead>
           <tr>
@@ -112,6 +130,20 @@ const styles = {
     textAlign: "center",
     marginBottom: "20px",
   },
+  button: {
+  padding: "8px 15px",
+  backgroundColor: "#3498db",
+  color: "white",
+  border: "none",
+  borderRadius: "5px",
+  cursor: "pointer"
+},
+input: {
+  margin: "5px",
+  padding: "8px",
+  borderRadius: "5px",
+  border: "1px solid #ccc"
+},
   table: {
     width: "100%",
     borderCollapse: "collapse",
@@ -122,7 +154,22 @@ const styles = {
   cell: {
     padding: "19px",
     borderBottom: "2px solid #ddd",
-  }
+  },
+  statsContainer: {
+  display: "flex",
+  justifyContent: "space-between",
+  gap: "20px",
+  marginBottom: "20px",
+},
+
+card: {
+  flex: 1,
+  color: "white",
+  padding: "20px",
+  borderRadius: "10px",
+  textAlign: "center",
+  boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+}
 };
 
 export default App;
