@@ -7,7 +7,7 @@ import time
 
 known_faces_dir = "ai_module/known_faces"
 
-# 🔥 NEW: function to load faces
+# function to load faces
 def load_known_faces():
     known_encodings = []
     known_names = []
@@ -36,10 +36,10 @@ def load_known_faces():
     return known_encodings, known_names
 
 
-# 🔥 INITIAL LOAD
+# INITIAL LOAD
 known_encodings, known_names = load_known_faces()
 
-# 🔥 Timer for reload
+# Timer for reload
 last_reload_time = time.time()
 
 # Start webcam
@@ -53,7 +53,7 @@ while True:
         print("Camera error")
         break
 
-    # 🔥 AUTO RELOAD EVERY 10 SECONDS
+    # AUTO RELOAD EVERY 10 SECONDS
     current_time = time.time()
     if current_time - last_reload_time > 10:
         known_encodings, known_names = load_known_faces()
@@ -93,7 +93,7 @@ while True:
         cv2.putText(frame, name, (left, top - 10),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
 
-    # 🔥 LOGGING CONTROL
+    # LOGGING CONTROL
     for name, status in detected_names:
         if name not in last_logged or (current_time - last_logged[name]) > 5:
             log_event(name, status)
